@@ -3,6 +3,7 @@
  */
 public class Settings {
     private static boolean serverOnWork = true;
+    private static String directory = "";
 
     public static boolean isServerOnWork() {
         return serverOnWork;
@@ -10,5 +11,13 @@ public class Settings {
 
     public static void setServerOnWork(boolean serverOnWork) {
         Settings.serverOnWork = serverOnWork;
+    }
+
+    public static String getDirectory() {
+        return directory;
+    }
+
+    public static void setDirectory(String directory) {
+        Settings.directory = directory;
     }
 }

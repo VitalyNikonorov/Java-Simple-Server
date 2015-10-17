@@ -1,25 +1,30 @@
 
 import java.io.*;
 import java.net.Socket;
+import java.util.Set;
 
 /**
  * Created by vitaly on 17.10.15.
+ * JSS - Java simple server =)
  */
 public class Server implements Runnable {
 
     private Socket socket;
     private InputStream is;
     private OutputStream os;
+    String[] params;
+    String route;
 
 
     public Server(Socket socket) throws IOException {
         this.socket = socket;
         this.is = socket.getInputStream();
         this.os = socket.getOutputStream();
+        String[] params;
 
     }
 
-    public void run(){
+    public void run() {
         try {
             System.out.println("Someone connect to me!");
             readInput();
@@ -34,41 +39,76 @@ public class Server implements Runnable {
         System.out.println("Someone connect to me!");
         BufferedReader br = new BufferedReader(new InputStreamReader(is));
         String s = null;
+        int index;
         StringBuilder sb = new StringBuilder();
-        while(true) {
+        while (true) {
             s = br.readLine();
+
+            index = s.indexOf("GET");
+
+            if (index != -1) {
+                int i;
+                for (i = index + 4; i < s.length(); i++) {
+                    if (s.charAt(i) == ' ') break;
+                }
+                route = s.substring(index + 4, i);
+            }
+
             sb.append(s);
             System.out.println("Try to read");
-            if(s == null || s.trim().length() == 0) {
+            if (s == null || s.trim().length() == 0) {
                 break;
             }
         }
         System.out.println("It asks this:\n" + sb.toString());
     }
 
-    private void writeOutput(){
+    private void writeOutput() throws IOException {
+        FileInputStream fileIS;
+        BufferedReader br;
+        String path = Settings.getDirectory() + route;
+
+        if (path.charAt(path.length()-1) == '/'){
+            path += "index.html";
+        }
         try {
-            String response = "<html><head><body><h1>It works!</h1></body></head></html>";
+            String response;
 
-            String result = "HTTP/1.1 200 OK\r\n" +
-                    "Content-Type: text/html\r\n" +
-                    "Content-Length: " + response.length() + "\r\n" +
-                    "Connection: close\r\n\r\n";
+            fileIS = new FileInputStream(path);
+            br = new BufferedReader(new InputStreamReader(fileIS));
 
-            result += response;
-            os.write(result.getBytes());
-            os.flush();
+            String strLine;
 
-            socket.close();
+            StringBuilder sb = new StringBuilder();
 
-        } catch (IOException e) {
-            e.printStackTrace();
-        }finally {
-            try {
+            while((strLine = br.readLine())!= null)
+            {
+                sb.append(strLine);
+            }
+
+            response = sb.toString();
+
+                String result = "HTTP/1.1 200 OK\r\n" +
+                        "Server: JSS\r\n"+
+                        "Content-Type: text/html\r\n" +
+                        "Content-Length: " + response.length() + "\r\n" +
+                        "Connection: close\r\n\r\n";
+
+                result += response;
+                os.write(result.getBytes());
+                os.flush();
+
                 socket.close();
-            } catch (Throwable t) {
+
+            }catch(IOException e){
+                e.printStackTrace();
+            }finally{
+                try {
+                    socket.close();
+                } catch (Throwable t) {
                     /*do nothing*/
+                }
             }
         }
     }
-}
+

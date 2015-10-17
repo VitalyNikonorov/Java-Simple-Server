@@ -7,6 +7,9 @@ public class Main {
     public static void main(String[] args) throws IOException {
         int port = 8080;
 
+        Settings.setDirectory( System.getProperty("user.dir") + "/www");
+        System.out.print(Settings.getDirectory());
+
         ServerSocket ss = new ServerSocket(port);
         while (Settings.isServerOnWork()) {
             Socket s = ss.accept();
