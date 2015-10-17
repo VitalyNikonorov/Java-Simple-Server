@@ -8,7 +8,7 @@ public class Main {
         int port = 8080;
 
         ServerSocket ss = new ServerSocket(port);
-        while (true) {
+        while (Settings.isServerOnWork()) {
             Socket s = ss.accept();
             System.out.println("Client accepted");
             new Thread(new Server(s)).start();

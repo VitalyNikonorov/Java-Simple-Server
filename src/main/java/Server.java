@@ -20,13 +20,12 @@ public class Server implements Runnable {
     }
 
     public void run(){
-        while (Settings.isServerOnWork()) {
-            try {
-                readInput();
-                writeOutput();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+        try {
+            System.out.println("Someone connect to me!");
+            readInput();
+            writeOutput();
+        } catch (IOException e) {
+            e.printStackTrace();
         }
 
     }
@@ -35,24 +34,20 @@ public class Server implements Runnable {
         System.out.println("Someone connect to me!");
         BufferedReader br = new BufferedReader(new InputStreamReader(is));
         String s = null;
+        StringBuilder sb = new StringBuilder();
         while(true) {
             s = br.readLine();
+            sb.append(s);
+            System.out.println("Try to read");
             if(s == null || s.trim().length() == 0) {
                 break;
             }
         }
-        System.out.println("It asks this:\n" + s);
+        System.out.println("It asks this:\n" + sb.toString());
     }
 
     private void writeOutput(){
         try {
-            BufferedReader reader = new BufferedReader(new InputStreamReader(is));
-            StringBuilder sb = new StringBuilder();
-            String line;
-            while ((line = reader.readLine()) != null)
-                sb.append(line).append("\n");
-            System.out.println("I get this data: \n" + sb.toString());
-
             String response = "<html><head><body><h1>It works!</h1></body></head></html>";
 
             String result = "HTTP/1.1 200 OK\r\n" +
