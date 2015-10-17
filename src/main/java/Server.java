@@ -118,6 +118,10 @@ public class Server implements Runnable {
                 break;
             case "html":
             case "": cType = "text/html";
+                break;
+            case "js": cType = "text/js";
+                break;
+            case "css": cType = "text/css";
         }
 
         String result = "HTTP/1.1 200 OK\r\n" +
@@ -147,6 +151,8 @@ public class Server implements Runnable {
                 break;
             }
 
+            case "css":
+            case "js":
             case "html":
             case "": {
                 fileIS = new FileInputStream(path);
