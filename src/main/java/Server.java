@@ -51,7 +51,6 @@ public class Server implements Runnable {
             String response = "<html><head><body><h1>It works!</h1></body></head></html>";
 
             String result = "HTTP/1.1 200 OK\r\n" +
-                    "Server: YarServer/2009-09-09\r\n" +
                     "Content-Type: text/html\r\n" +
                     "Content-Length: " + response.length() + "\r\n" +
                     "Connection: close\r\n\r\n";
