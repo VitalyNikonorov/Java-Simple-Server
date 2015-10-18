@@ -1,7 +1,6 @@
-import javax.imageio.ImageIO;
-import java.awt.image.BufferedImage;
 import java.io.*;
 import java.net.Socket;
+import java.util.Date;
 
 /**
  * Created by vitaly on 17.10.15.
@@ -29,6 +28,7 @@ public class Server implements Runnable {
             String route = getRoute(request);
 
             sendResponse(route);
+
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -53,26 +53,41 @@ public class Server implements Runnable {
     }
 
     private String getRoute(String s) {
-        String result;
+        String result = null;
         int index;
+        int methodPointer;
 
-        index = s.indexOf("GET ");
+        methodPointer = s.indexOf(' ');
 
-        int i;
+        switch (s.substring(0, methodPointer)){
+            case "GET":{
+                index = s.indexOf("GET ");
 
-        for (i = index + "GET ".length(); i < s.length(); i++) {
-            if (s.charAt(i) == ' ') break;
+                int i;
+
+                for (i = index + "GET ".length(); i < s.length(); i++) {
+                    if (s.charAt(i) == ' ') break;
+                }
+
+                result = s.substring(index + "GET ".length(), i);
+
+                if (result.indexOf('.') == -1){
+                    if (result.charAt(result.length()-1) != '/')
+                        result += "/";
+                }
+
+                System.out.println("It asks this:\n" + s);
+                System.out.println("\n" + "Work Directory:\n" + result + "\n");
+                break;
+            }
+
+            case "POST":{
+                System.out.println("POST METHOD!!!!");
+
+            }
+
         }
 
-        result = s.substring(index + "GET ".length(), i);
-
-        if (result.indexOf('.') == -1){
-            if (result.charAt(result.length()-1) != '/')
-            result += "/";
-        }
-
-        System.out.println("It asks this:\n" + s);
-        System.out.println("\n" + "Work Directory:\n" + result + "\n");
         return result;
     }
 
@@ -85,22 +100,22 @@ public class Server implements Runnable {
         if (path.charAt(path.length()-1) == '/'){
             path += "index.html";
         }
+
         try {
-            String extension = path.substring(path.indexOf('.')+1);
+            String extension = path.substring(path.lastIndexOf('.')+1);
 
             content = getContent(extension, path);
 
             if (content != null) {
-                headers = getResponseHeader(extension, content.length);
+                headers = getResponseHeader(extension, content.length, 200);
             }else{
-                headers = "HTTP/1.1 400 Not Found\r\n" +
-                        "Server: JSS\r\n"+
-                        "Content-Type: text/html\r\n" +
-                        "Connection: close\r\n\r\n";
+                headers = getResponseHeader(null, 0, 404);
                 content = "<!DOCTYPE html><html><head></head><body><h1>Not found</h1></body></html>".getBytes();
             }
         }catch(IOException e){
             e.printStackTrace();
+            headers = getResponseHeader(null, 0, 404);
+            content = "<!DOCTYPE html><html><head></head><body><h1>Not found</h1></body></html>".getBytes();
 
         }finally{
             os.write(headers.getBytes());
@@ -110,35 +125,52 @@ public class Server implements Runnable {
         }
     }
 
-    private String getResponseHeader(String extension, int contentLength){
+    private String getResponseHeader(String extension, int contentLength, int status){
 
-        String cType = null;
+        String result = null;
+        switch (status){
 
-        switch (extension){
-            case "png": cType = "image/png";
+            case 200:{
+                String cType = null;
+                switch (extension){
+                    case "png": cType = "image/png";
+                        break;
+                    case "gif": cType = "image/gif";
+                        break;
+                    case "jpg":
+                    case "jpeg": cType = "image/jpeg";
+                        break;
+                    case "html":
+                    case "": cType = "text/html";
+                        break;
+                    case "js": cType = "text/javascript";
+                        break;
+                    case "css": cType = "text/css";
+                        break;
+                    case "swf": cType = "application/x-shockwave-flash";
+                        break;
+                    default: cType = "text/html";
+                        break;
+                }
+
+                result = "HTTP/1.1 "+status+" OK\r\n" +
+                        "Date: "+ new Date()+ "\r\n"+
+                        "Server: JSS\r\n"+
+                        "Content-Type: " +cType+ "\r\n" +
+                        "Content-Length: " + contentLength + "\r\n" +
+                        "Connection: close\r\n\r\n";
+            }
+            break;
+
+            case 404:{
+                result = "HTTP/1.1 404 Not Found\r\n" +
+                        "Server: JSS\r\n"+
+                        "Content-Type: text/html\r\n" +
+                        "Connection: close\r\n\r\n";
                 break;
-            case "gif":
-            case "jpg":
-            case "jpeg": cType = "image/jpeg";
-                break;
-            case "html":
-            case "": cType = "text/html";
-                break;
-            case "js": cType = "text/javascript;";
-                break;
-            case "css": cType = "text/css";
-                break;
-            case "swf": cType = "application/x-shockwave-flash";
-                break;
-            default: cType = "text/html";
-                break;
+            }
         }
 
-        String result = "HTTP/1.1 200 OK\r\n" +
-                "Server: JSS\r\n"+
-                "Content-Type: " +cType+ "\r\n" +
-                "Content-Length: " + contentLength + "\r\n" +
-                "Connection: close\r\n\r\n";
 
         return result;
     }
@@ -151,35 +183,15 @@ public class Server implements Runnable {
         path = parseEsc(path);
 
         switch (extension){
+            case "txt":
             case "png":
             case "gif":
             case "jpg":
-            case "jpeg":{
-                BufferedImage originalImage = ImageIO.read(new File(path));
-                ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                ImageIO.write( originalImage, extension, baos );
-                baos.flush();
-                result = baos.toByteArray();
-                break;
-            }
-
+            case "jpeg":
             case "css":
             case "js":
             case "html":
-            case "": {
-                fileIS = new FileInputStream(path);
-                br = new BufferedReader(new InputStreamReader(fileIS));
-
-                String strLine;
-
-                StringBuilder sb = new StringBuilder();
-
-                while ((strLine = br.readLine()) != null) {
-                    sb.append(strLine);
-                }
-                result = sb.toString().getBytes();
-                break;
-            }
+            case "":
             case "swf":{
                 InputStream inStream = null;
                 BufferedInputStream bis = null;
