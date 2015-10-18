@@ -67,7 +67,7 @@ public class Server implements Runnable {
         return sb.toString();
     }
 
-    private String getRoute(String s) {
+    private String getRoute(String s) throws UnsupportedEncodingException {
         String result = null;
         int index;
 
@@ -81,9 +81,20 @@ public class Server implements Runnable {
 
         result = s.substring(index + " ".length(), i);
 
+        result = parseEsc(result);
+
         if (result.indexOf('.') == -1){
             if (result.charAt(result.length()-1) != '/')
                 result += "/";
+        }else{
+            if (result.charAt(result.length()-1) == '/') {
+                result = result.substring(0, result.length() - 1);
+                int o = 0;
+            }
+        }
+
+        if (result.indexOf('?') != -1){
+            result = result.substring(0, result.indexOf('?'));
         }
 
         System.out.println("It asks this:\n" + s);
@@ -205,8 +216,6 @@ public class Server implements Runnable {
         byte[] result = null;
         FileInputStream fileIS;
         BufferedReader br;
-
-        path = parseEsc(path);
 
         switch (extension){
             case "txt":
