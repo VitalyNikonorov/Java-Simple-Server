@@ -11,6 +11,7 @@ public class Server implements Runnable {
     private Socket socket;
     private InputStream is;
     private OutputStream os;
+    private String requestMethod;
 
 
     public Server(Socket socket) throws IOException {
@@ -25,9 +26,23 @@ public class Server implements Runnable {
 
             String request = readInput();
 
-            String route = getRoute(request);
+            requestMethod = findMethod(request);
 
-            sendResponse(route);
+            switch (requestMethod){
+                case "HEAD":
+                case "GET":{
+                    String route = getRoute(request);
+                    sendResponse(route);
+                    break;
+                }
+                case "POST":{
+                    String header = getResponseHeader(null, 0, 405);
+                    os.write(header.getBytes());
+                    os.flush();
+                    socket.close();
+                    break;
+                }
+            }
 
         } catch (IOException e) {
             e.printStackTrace();
@@ -55,38 +70,24 @@ public class Server implements Runnable {
     private String getRoute(String s) {
         String result = null;
         int index;
-        int methodPointer;
 
-        methodPointer = s.indexOf(' ');
+        index = s.indexOf(" ");
 
-        switch (s.substring(0, methodPointer)){
-            case "GET":{
-                index = s.indexOf("GET ");
+        int i;
 
-                int i;
-
-                for (i = index + "GET ".length(); i < s.length(); i++) {
-                    if (s.charAt(i) == ' ') break;
-                }
-
-                result = s.substring(index + "GET ".length(), i);
-
-                if (result.indexOf('.') == -1){
-                    if (result.charAt(result.length()-1) != '/')
-                        result += "/";
-                }
-
-                System.out.println("It asks this:\n" + s);
-                System.out.println("\n" + "Work Directory:\n" + result + "\n");
-                break;
-            }
-
-            case "POST":{
-                System.out.println("POST METHOD!!!!");
-
-            }
-
+        for (i = index + " ".length(); i < s.length(); i++) {
+            if (s.charAt(i) == ' ') break;
         }
+
+        result = s.substring(index + " ".length(), i);
+
+        if (result.indexOf('.') == -1){
+            if (result.charAt(result.length()-1) != '/')
+                result += "/";
+        }
+
+        System.out.println("It asks this:\n" + s);
+        System.out.println("\n" + "Work Directory:\n" + result + "\n");
 
         return result;
     }
@@ -106,11 +107,19 @@ public class Server implements Runnable {
 
             content = getContent(extension, path);
 
+            String o = path.substring(path.lastIndexOf('/')+1, path.length()-1);
+            System.out.println("its o: " + o);
+
             if (content != null) {
                 headers = getResponseHeader(extension, content.length, 200);
             }else{
-                headers = getResponseHeader(null, 0, 404);
-                content = "<!DOCTYPE html><html><head></head><body><h1>Not found</h1></body></html>".getBytes();
+                if( path.substring(path.lastIndexOf('/')+1, path.length()).equals("index.html")) {
+                    headers = getResponseHeader(null, 0, 403);
+                    content = "<!DOCTYPE html><html><head></head><body><h1>Forbidden</h1></body></html>".getBytes();
+                }else{
+                    headers = getResponseHeader(null, 0, 404);
+                    content = "<!DOCTYPE html><html><head></head><body><h1>Not found</h1></body></html>".getBytes();
+                }
             }
         }catch(IOException e){
             e.printStackTrace();
@@ -119,7 +128,9 @@ public class Server implements Runnable {
 
         }finally{
             os.write(headers.getBytes());
-            os.write(content);
+            if (requestMethod.equals("GET")) {
+                os.write(content);
+            }
             os.flush();
             socket.close();
         }
@@ -162,6 +173,14 @@ public class Server implements Runnable {
             }
             break;
 
+            case 403:{
+                result = "HTTP/1.1 403 Forbidden\r\n" +
+                        "Server: JSS\r\n"+
+                        "Content-Type: text/html\r\n" +
+                        "Connection: close\r\n\r\n";
+                break;
+            }
+
             case 404:{
                 result = "HTTP/1.1 404 Not Found\r\n" +
                         "Server: JSS\r\n"+
@@ -169,6 +188,13 @@ public class Server implements Runnable {
                         "Connection: close\r\n\r\n";
                 break;
             }
+
+            case 405:
+                result = "HTTP/1.1 405 Method Not Allowed \r\n" +
+                    "Server: JSS\r\n"+
+                    "Content-Type: text/html\r\n" +
+                    "Connection: close\r\n\r\n";
+                break;
         }
 
 
@@ -230,4 +256,15 @@ public class Server implements Runnable {
         }
         return s;
     }
+
+    private String findMethod(String request){
+        String method = null;
+
+        int index = request.indexOf(' ');
+
+        method = request.substring(0, index);
+
+        return method;
+    }
+
 }
