@@ -1,8 +1,8 @@
-
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.*;
 import java.net.Socket;
+
 /**
  * Created by vitaly on 17.10.15.
  * JSS - Java simple server =)
@@ -79,28 +79,33 @@ public class Server implements Runnable {
     private void sendResponse(String route) throws IOException {
 
         String path = Settings.getDirectory() + route;
+        String headers = null;
+        byte[] content = null;
 
         if (path.charAt(path.length()-1) == '/'){
             path += "index.html";
         }
         try {
-
-            String headers = null;
-            byte[] content = null;
-
             String extension = path.substring(path.indexOf('.')+1);
 
             content = getContent(extension, path);
 
-            headers = getResponseHeader(extension, content.length);
+            if (content != null) {
+                headers = getResponseHeader(extension, content.length);
+            }else{
+                headers = "HTTP/1.1 400 Not Found\r\n" +
+                        "Server: JSS\r\n"+
+                        "Content-Type: text/html\r\n" +
+                        "Connection: close\r\n\r\n";
+                content = "<!DOCTYPE html><html><head></head><body><h1>Not found</h1></body></html>".getBytes();
+            }
+        }catch(IOException e){
+            e.printStackTrace();
 
+        }finally{
             os.write(headers.getBytes());
             os.write(content);
             os.flush();
-
-        }catch(IOException e){
-            e.printStackTrace();
-        }finally{
             socket.close();
         }
     }
@@ -119,9 +124,14 @@ public class Server implements Runnable {
             case "html":
             case "": cType = "text/html";
                 break;
-            case "js": cType = "text/js";
+            case "js": cType = "text/javascript;";
                 break;
             case "css": cType = "text/css";
+                break;
+            case "swf": cType = "application/x-shockwave-flash";
+                break;
+            default: cType = "text/html";
+                break;
         }
 
         String result = "HTTP/1.1 200 OK\r\n" +
@@ -137,6 +147,8 @@ public class Server implements Runnable {
         byte[] result = null;
         FileInputStream fileIS;
         BufferedReader br;
+
+        path = parseEsc(path);
 
         switch (extension){
             case "png":
@@ -168,7 +180,42 @@ public class Server implements Runnable {
                 result = sb.toString().getBytes();
                 break;
             }
+            case "swf":{
+                InputStream inStream = null;
+                BufferedInputStream bis = null;
+
+                try{
+                    inStream = new FileInputStream(path);
+                    bis = new BufferedInputStream(inStream);
+
+                    int numByte = bis.available();
+                    result = new byte[numByte];
+
+                    bis.read(result);
+
+                }catch(Exception e){
+                    e.printStackTrace();
+                }finally{
+                    if(inStream!=null)
+                        inStream.close();
+                    if(bis!=null)
+                        bis.close();
+                }
+            }
         }
         return result;
+    }
+
+    public static String parseEsc(String s) throws UnsupportedEncodingException {
+        int i = s.indexOf('%');
+
+        while (i != -1){
+            byte bs[] = new byte[1];
+            bs[0] = (byte) Integer.parseInt(s.substring(i+1, i+3), 16);
+
+            s = s.replaceFirst("%..", new String(bs, "UTF8"));
+            i = s.indexOf('%');
+        }
+        return s;
     }
 }
