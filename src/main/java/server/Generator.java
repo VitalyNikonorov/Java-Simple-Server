@@ -8,7 +8,14 @@ import java.util.Date;
 public class Generator {
 
     public static String generatePage(String message){
-        String result = "<!DOCTYPE html><html><head></head><body><h1>"+message+"</h1></body></html>";
+        String result =
+                "<!DOCTYPE html>" +
+                "<html>" +
+                "   <head></head>" +
+                "   <body>" +
+                "       <h1>"+message+"</h1>" +
+                "   </body>" +
+                "</html>";
         return result;
     }
 
@@ -16,12 +23,10 @@ public class Generator {
 
         StringBuilder sb = new StringBuilder();
 
-
-
-            sb.append("HTTP/1.1 " + status + " " + caption + "\r\n")
-                    .append("Date: "+ new Date()+ "\r\n")
-                    .append("Server: JSS\r\n")
-                    .append("Content-Type: " + cType + "\r\n");
+        sb.append("HTTP/1.1 " + status + " " + caption + "\r\n")
+                .append("Date: "+ new Date()+ "\r\n")
+                .append("Server: JSS\r\n")
+                .append("Content-Type: " + cType + "\r\n");
 
         if (contentLength != null){
             sb.append("Content-Length: " + contentLength + "\r\n");

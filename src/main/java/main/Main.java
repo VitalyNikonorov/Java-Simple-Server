@@ -30,15 +30,12 @@ public class Main {
         String host = commandLine.getOptionValue("h", "0.0.0.0");
         int port = Integer.parseInt(commandLine.getOptionValue("p", "8080"));
 
-        //main.Settings.setDirectory( System.getProperty("user.dir") + "/www");
-
         Settings.setDirectory(directory);
         System.out.print(Settings.getDirectory());
 
         ServerSocket ss = new ServerSocket(port);
         while (Settings.isServerOnWork()) {
             Socket s = ss.accept();
-            System.out.println("Client accepted");
             new Thread(new Server(s)).start();
         }
 

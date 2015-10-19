@@ -25,16 +25,18 @@ public class ResponseHandler {
     }
 
     public void sendResponse(String route, String requestMethod) throws IOException {
-
-        String path = Settings.getDirectory() + route;
-            if (path.charAt(path.length()-1) == '/'){
-                path += "index.html";
-            }
-
-        String extension = path.substring(path.lastIndexOf('.')+1);
         try {
-            prepareResponse(extension, path);
+            if (requestMethod.equals("POST")){
+                headers = getResponseHeader(null, 0, 405);
+            }else {
+                String path = Settings.getDirectory() + route;
+                if (path.charAt(path.length() - 1) == '/') {
+                    path += "index.html";
+                }
 
+                String extension = path.substring(path.lastIndexOf('.') + 1);
+                prepareResponse(extension, path);
+            }
         }catch(IOException e){
             e.printStackTrace();
             headers = getResponseHeader(null, 0, 404);
@@ -57,7 +59,7 @@ public class ResponseHandler {
         if (content != null) {
             headers = getResponseHeader(extension, content.length, 200);
         }else{
-            if( path.substring(path.lastIndexOf('/')+1, path.length()).equals("index.html")) {
+            if(isDirectory(path)) {
                 headers = getResponseHeader(null, 0, 403);
                 content = Generator.generatePage("Forbidden").getBytes();
             }else{
@@ -65,6 +67,10 @@ public class ResponseHandler {
                 content = Generator.generatePage("Not Found").getBytes();
             }
         }
+    }
+
+    private boolean isDirectory(String path) {
+        return path.substring(path.lastIndexOf('/')+1, path.length()).equals("index.html");
     }
 
 
