@@ -1,11 +1,11 @@
 package handlers;
 
 import main.Settings;
+import server.Generator;
 
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.Socket;
-import java.util.Date;
 
 /**
  * Created by vitaly on 19.10.15.
@@ -27,20 +27,18 @@ public class ResponseHandler {
     public void sendResponse(String route, String requestMethod) throws IOException {
 
         String path = Settings.getDirectory() + route;
-
-        try {
             if (path.charAt(path.length()-1) == '/'){
                 path += "index.html";
             }
 
-            String extension = path.substring(path.lastIndexOf('.')+1);
-
+        String extension = path.substring(path.lastIndexOf('.')+1);
+        try {
             prepareResponse(extension, path);
 
         }catch(IOException e){
             e.printStackTrace();
             headers = getResponseHeader(null, 0, 404);
-            content = "<!DOCTYPE html><html><head></head><body><h1>Not found</h1></body></html>".getBytes();
+            content = Generator.generatePage("Not Found").getBytes();
 
         }finally{
             os.write(headers.getBytes());
@@ -50,23 +48,23 @@ public class ResponseHandler {
             os.flush();
             socket.close();
         }
+
     }
 
     private void prepareResponse(String extension, String path) throws IOException {
-        content = fileSystem.getContent(extension, path);
 
+        content = fileSystem.getContent(extension, path);
         if (content != null) {
             headers = getResponseHeader(extension, content.length, 200);
         }else{
             if( path.substring(path.lastIndexOf('/')+1, path.length()).equals("index.html")) {
                 headers = getResponseHeader(null, 0, 403);
-                content = "<!DOCTYPE html><html><head></head><body><h1>Forbidden</h1></body></html>".getBytes();
+                content = Generator.generatePage("Forbidden").getBytes();
             }else{
                 headers = getResponseHeader(null, 0, 404);
-                content = "<!DOCTYPE html><html><head></head><body><h1>Not found</h1></body></html>".getBytes();
+                content = Generator.generatePage("Not Found").getBytes();
             }
         }
-
     }
 
 
@@ -98,36 +96,22 @@ public class ResponseHandler {
                         break;
                 }
 
-                result = "HTTP/1.1 "+status+" OK\r\n" +
-                        "Date: "+ new Date()+ "\r\n"+
-                        "Server: JSS\r\n"+
-                        "Content-Type: " +cType+ "\r\n" +
-                        "Content-Length: " + contentLength + "\r\n" +
-                        "Connection: close\r\n\r\n";
+                result = Generator.generateHeaders(status, "OK" ,cType, contentLength);
             }
             break;
 
             case 403:{
-                result = "HTTP/1.1 403 Forbidden\r\n" +
-                        "Server: JSS\r\n"+
-                        "Content-Type: text/html\r\n" +
-                        "Connection: close\r\n\r\n";
+                result = Generator.generateHeaders(status, "Forbidden", "text/html", null);
                 break;
             }
 
             case 404:{
-                result = "HTTP/1.1 404 Not Found\r\n" +
-                        "Server: JSS\r\n"+
-                        "Content-Type: text/html\r\n" +
-                        "Connection: close\r\n\r\n";
+                result = Generator.generateHeaders(status, "Not Found", "text/html", null);
                 break;
             }
 
             case 405:
-                result = "HTTP/1.1 405 Method Not Allowed \r\n" +
-                        "Server: JSS\r\n"+
-                        "Content-Type: text/html\r\n" +
-                        "Connection: close\r\n\r\n";
+                result = Generator.generateHeaders(status, "Method Not Allowed", "text/html", null);
                 break;
         }
         return result;
