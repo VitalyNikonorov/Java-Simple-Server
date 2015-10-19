@@ -1,3 +1,7 @@
+package server;
+
+import main.Settings;
+
 import java.io.*;
 import java.net.Socket;
 import java.util.Date;
@@ -217,36 +221,39 @@ public class Server implements Runnable {
         FileInputStream fileIS;
         BufferedReader br;
 
-        switch (extension){
-            case "txt":
-            case "png":
-            case "gif":
-            case "jpg":
-            case "jpeg":
-            case "css":
-            case "js":
-            case "html":
-            case "":
-            case "swf":{
-                InputStream inStream = null;
-                BufferedInputStream bis = null;
+        InputStream inStream = null;
+        BufferedInputStream bis = null;
 
-                try{
-                    inStream = new FileInputStream(path);
-                    bis = new BufferedInputStream(inStream);
+        if (isSubDirectory(new File(Settings.getDirectory()), new File(path))) {
 
-                    int numByte = bis.available();
-                    result = new byte[numByte];
+            switch (extension) {
+                case "txt":
+                case "png":
+                case "gif":
+                case "jpg":
+                case "jpeg":
+                case "css":
+                case "js":
+                case "html":
+                case "":
+                case "swf": {
+                    try {
+                        inStream = new FileInputStream(path);
+                        bis = new BufferedInputStream(inStream);
 
-                    bis.read(result);
+                        int numByte = bis.available();
+                        result = new byte[numByte];
 
-                }catch(Exception e){
-                    e.printStackTrace();
-                }finally{
-                    if(inStream!=null)
-                        inStream.close();
-                    if(bis!=null)
-                        bis.close();
+                        bis.read(result);
+
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    } finally {
+                        if (inStream != null)
+                            inStream.close();
+                        if (bis != null)
+                            bis.close();
+                    }
                 }
             }
         }
@@ -274,6 +281,22 @@ public class Server implements Runnable {
         method = request.substring(0, index);
 
         return method;
+    }
+
+
+    public boolean isSubDirectory(File root, File path)
+            throws IOException {
+        root = root.getCanonicalFile();
+        path = path.getCanonicalFile();
+
+        File parentFile = path;
+        while (parentFile != null) {
+            if (root.equals(parentFile)) {
+                return true;
+            }
+            parentFile = parentFile.getParentFile();
+        }
+        return false;
     }
 
 }

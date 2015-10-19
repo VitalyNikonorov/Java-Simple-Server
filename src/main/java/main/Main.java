@@ -1,7 +1,11 @@
+package main;
+
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
+
 import org.apache.commons.cli.*;
+import server.Server;
 
 public class Main {
 
@@ -26,7 +30,7 @@ public class Main {
         String host = commandLine.getOptionValue("h", "0.0.0.0");
         int port = Integer.parseInt(commandLine.getOptionValue("p", "8080"));
 
-        //Settings.setDirectory( System.getProperty("user.dir") + "/www");
+        //main.Settings.setDirectory( System.getProperty("user.dir") + "/www");
 
         Settings.setDirectory(directory);
         System.out.print(Settings.getDirectory());
