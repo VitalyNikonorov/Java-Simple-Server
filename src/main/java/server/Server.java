@@ -1,5 +1,7 @@
 package server;
 
+import handlers.RequestHandler;
+import handlers.ResponseHandler;
 import main.Settings;
 
 import java.io.*;
@@ -16,19 +18,22 @@ public class Server implements Runnable {
     private InputStream is;
     private OutputStream os;
     private String requestMethod;
+    private RequestHandler requestHandler;
+    private ResponseHandler responseHandler;
 
 
     public Server(Socket socket) throws IOException {
         this.socket = socket;
         this.is = socket.getInputStream();
         this.os = socket.getOutputStream();
+        this.requestHandler = new RequestHandler(socket);
     }
 
     public void run() {
         try {
             System.out.println("Someone connect to me!");
 
-            String request = readInput();
+            String request = requestHandler.getRequest();
 
             requestMethod = findMethod(request);
 
@@ -51,24 +56,6 @@ public class Server implements Runnable {
         } catch (IOException e) {
             e.printStackTrace();
         }
-    }
-
-    private String readInput() throws IOException {
-        System.out.println("Someone connect to me!");
-        BufferedReader br = new BufferedReader(new InputStreamReader(is));
-        String s = null;
-
-        StringBuilder sb = new StringBuilder();
-
-        while (true) {
-            s = br.readLine();
-
-            sb.append(s);
-            if (s == null || s.trim().length() == 0) {
-                break;
-            }
-        }
-        return sb.toString();
     }
 
     private String getRoute(String s) throws UnsupportedEncodingException {
