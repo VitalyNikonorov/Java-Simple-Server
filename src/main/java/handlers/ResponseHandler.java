@@ -1,12 +1,12 @@
 package handlers;
 
+import org.apache.commons.io.IOUtils;
 import server.Generator;
 
-import java.io.BufferedInputStream;
-import java.io.File;
-import java.io.IOException;
-import java.io.OutputStream;
+import java.io.*;
 import java.net.Socket;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 
 /**
  * Created by vitaly on 19.10.15.
@@ -45,13 +45,7 @@ public class ResponseHandler {
 
             if (requestMethod.equals("GET")) {
                 if (content400 == null) {
-
-                    int count;
-                    byte[] buffer = new byte[8192];
-                    while ((count = content.read(buffer)) > 0){
-                        os.write(buffer, 0, count);
-                        os.flush();
-                    }
+                    IOUtils.copyLarge(content, os);
                 }else{
                     os.write(content400);
                     os.flush();

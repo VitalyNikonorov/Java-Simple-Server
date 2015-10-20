@@ -11,7 +11,6 @@ public class FileSystemHandler {
 
 
     public BufferedInputStream getContent(String extension, String path) throws IOException {
-        byte[] result = null;
 
         InputStream inStream = null;
         BufferedInputStream bis = null;
@@ -28,6 +27,7 @@ public class FileSystemHandler {
                 case "js":
                 case "html":
                 case "":
+                case "zip":
                 case "swf": {
 
                     if (new File(path).exists()) {
