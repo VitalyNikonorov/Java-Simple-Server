@@ -10,7 +10,7 @@ import java.io.*;
 public class FileSystemHandler {
 
 
-    public byte[] getContent(String extension, String path) throws IOException {
+    public BufferedInputStream getContent(String extension, String path) throws IOException {
         byte[] result = null;
 
         InputStream inStream = null;
@@ -18,7 +18,7 @@ public class FileSystemHandler {
 
         if (isSubDirectory(new File(Settings.getDirectory()), new File(path))) {
 
-            switch (extension) {
+            switch (extension.toLowerCase()) {
                 case "txt":
                 case "png":
                 case "gif":
@@ -29,27 +29,17 @@ public class FileSystemHandler {
                 case "html":
                 case "":
                 case "swf": {
-                    try {
+
+                    if (new File(path).exists()) {
                         inStream = new FileInputStream(path);
                         bis = new BufferedInputStream(inStream);
-
-                        int numByte = bis.available();
-                        result = new byte[numByte];
-
-                        bis.read(result);
-
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    } finally {
-                        if (inStream != null)
-                            inStream.close();
-                        if (bis != null)
-                            bis.close();
+                    }else{
+                        bis = null;
                     }
                 }
             }
         }
-        return result;
+        return bis;
     }
 
     public boolean isSubDirectory(File root, File path)

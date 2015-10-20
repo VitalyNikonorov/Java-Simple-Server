@@ -1,8 +1,9 @@
 package handlers;
 
-import main.Settings;
 import server.Generator;
 
+import java.io.BufferedInputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.Socket;
@@ -15,7 +16,8 @@ public class ResponseHandler {
     private Socket socket;
     private OutputStream os;
     private String headers = null;
-    private byte[] content = null;
+    private BufferedInputStream content = null;
+    private byte[] content400 = null;
     private FileSystemHandler fileSystem;
 
     public ResponseHandler(Socket socket) throws IOException {
@@ -24,15 +26,11 @@ public class ResponseHandler {
         this.socket = socket;
     }
 
-    public void sendResponse(String route, String requestMethod) throws IOException {
+    public void sendResponse(String path, String requestMethod) throws IOException {
         try {
             if (requestMethod.equals("POST")){
                 headers = getResponseHeader(null, 0, 405);
             }else {
-                String path = Settings.getDirectory() + route;
-                if (path.charAt(path.length() - 1) == '/') {
-                    path += "index.html";
-                }
 
                 String extension = path.substring(path.lastIndexOf('.') + 1);
                 prepareResponse(extension, path);
@@ -40,13 +38,30 @@ public class ResponseHandler {
         }catch(IOException e){
             e.printStackTrace();
             headers = getResponseHeader(null, 0, 404);
-            content = Generator.generatePage("Not Found").getBytes();
+            content400 = Generator.generatePage("Not Found").getBytes();
 
         }finally{
             os.write(headers.getBytes());
+
             if (requestMethod.equals("GET")) {
-                os.write(content);
+                if (content400 == null) {
+
+                    int count;
+                    byte[] buffer = new byte[8192];
+                    while ((count = content.read(buffer)) > 0){
+                        os.write(buffer, 0, count);
+                        os.flush();
+                    }
+                }else{
+                    os.write(content400);
+                    os.flush();
+                }
             }
+
+            if (content != null){
+                content.close();
+            }
+
             os.flush();
             socket.close();
         }
@@ -55,16 +70,18 @@ public class ResponseHandler {
 
     private void prepareResponse(String extension, String path) throws IOException {
 
+        File file = new File(path);
+
         content = fileSystem.getContent(extension, path);
         if (content != null) {
-            headers = getResponseHeader(extension, content.length, 200);
+            headers = getResponseHeader(extension, file.length(), 200);
         }else{
             if(isDirectory(path)) {
                 headers = getResponseHeader(null, 0, 403);
-                content = Generator.generatePage("Forbidden").getBytes();
+                content400 = Generator.generatePage("Forbidden").getBytes();
             }else{
                 headers = getResponseHeader(null, 0, 404);
-                content = Generator.generatePage("Not Found").getBytes();
+                content400 = Generator.generatePage("Not Found").getBytes();
             }
         }
     }
@@ -74,7 +91,7 @@ public class ResponseHandler {
     }
 
 
-    public String getResponseHeader(String extension, int contentLength, int status){
+    public String getResponseHeader(String extension, long contentLength, int status){
 
         String result = null;
         switch (status){
@@ -102,7 +119,7 @@ public class ResponseHandler {
                         break;
                 }
 
-                result = Generator.generateHeaders(status, "OK" ,cType, contentLength);
+                result = Generator.generateHeaders(status, "OK" ,cType, (long) contentLength);
             }
             break;
 

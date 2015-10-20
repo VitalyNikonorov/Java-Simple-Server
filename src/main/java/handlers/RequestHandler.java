@@ -1,5 +1,7 @@
 package handlers;
 
+import main.Settings;
+
 import java.io.*;
 import java.net.Socket;
 
@@ -41,9 +43,9 @@ public class RequestHandler{
 
         result = parseEsc(result);
 
-        result = getCanonicURI(result);
-
         result = removeGETArgs(result);
+
+        result = getCanonicURI(result);
 
         return result;
     }
@@ -61,13 +63,18 @@ public class RequestHandler{
 
         result = request.substring(index + 1);
         result = result.substring(0, result.indexOf(' '));
+
+        result = Settings.getDirectory() + result;
+
         return result;
     }
 
     private String getCanonicURI(String result) {
         if (isDirectory(result)){
             if (result.charAt(result.length()-1) != '/') {
-                result += "/";
+                result += "/index.html";
+            }else{
+                result += "index.html";
             }
         }else{
             if (result.charAt(result.length()-1) == '/') {
@@ -78,7 +85,8 @@ public class RequestHandler{
     }
 
     private boolean isDirectory(String result) {
-        return result.indexOf('.') == -1;
+        File file = new File(result);
+        return file.isDirectory();
     }
 
     public static String parseEsc(String s) throws UnsupportedEncodingException {

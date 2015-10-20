@@ -19,7 +19,7 @@ public class Generator {
         return result;
     }
 
-    public static String generateHeaders(int status, String caption,String cType, Integer contentLength){
+    public static String generateHeaders(int status, String caption,String cType, Long contentLength){
 
         StringBuilder sb = new StringBuilder();
 

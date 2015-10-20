@@ -1,3 +1,7 @@
-/Users/vitaly/Documents/technopark/3/TP_Highload/src/main/java/Settings.java
-/Users/vitaly/Documents/technopark/3/TP_Highload/src/main/java/Main.java
-/Users/vitaly/Documents/technopark/3/TP_Highload/src/main/java/Server.java
+/Users/vitaly/Documents/technopark/3/TP_Highload/src/main/java/server/Generator.java
+/Users/vitaly/Documents/technopark/3/TP_Highload/src/main/java/handlers/FileSystemHandler.java
+/Users/vitaly/Documents/technopark/3/TP_Highload/src/main/java/main/Settings.java
+/Users/vitaly/Documents/technopark/3/TP_Highload/src/main/java/handlers/ResponseHandler.java
+/Users/vitaly/Documents/technopark/3/TP_Highload/src/main/java/server/Server.java
+/Users/vitaly/Documents/technopark/3/TP_Highload/src/main/java/handlers/RequestHandler.java
+/Users/vitaly/Documents/technopark/3/TP_Highload/src/main/java/main/Main.java
