@@ -10,10 +10,9 @@ import java.io.*;
 public class FileSystemHandler {
 
 
-    public BufferedInputStream getContent(String extension, String path) throws IOException {
+    public InputStream getContent(String extension, String path) throws IOException {
 
         InputStream inStream = null;
-        BufferedInputStream bis = null;
 
         if (isSubDirectory(new File(Settings.getDirectory()), new File(path))) {
 
@@ -32,14 +31,13 @@ public class FileSystemHandler {
 
                     if (new File(path).exists()) {
                         inStream = new FileInputStream(path);
-                        bis = new BufferedInputStream(inStream);
                     }else{
-                        bis = null;
+                        inStream = null;
                     }
                 }
             }
         }
-        return bis;
+        return inStream;
     }
 
     public boolean isSubDirectory(File root, File path)

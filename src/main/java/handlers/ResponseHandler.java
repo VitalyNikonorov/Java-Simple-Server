@@ -5,8 +5,6 @@ import server.Generator;
 
 import java.io.*;
 import java.net.Socket;
-import java.nio.file.Files;
-import java.nio.file.StandardCopyOption;
 
 /**
  * Created by vitaly on 19.10.15.
@@ -16,9 +14,10 @@ public class ResponseHandler {
     private Socket socket;
     private OutputStream os;
     private String headers = null;
-    private BufferedInputStream content = null;
+    private InputStream content = null;
     private byte[] content400 = null;
     private FileSystemHandler fileSystem;
+    BufferedInputStream bis;
 
     public ResponseHandler(Socket socket) throws IOException {
         this.fileSystem = new FileSystemHandler();
@@ -45,11 +44,16 @@ public class ResponseHandler {
 
             if (requestMethod.equals("GET")) {
                 if (content400 == null) {
-                    IOUtils.copyLarge(content, os);
+                    bis = new BufferedInputStream(content);
+                    IOUtils.copyLarge(bis, os);
                 }else{
                     os.write(content400);
                     os.flush();
                 }
+            }
+
+            if (bis != null){
+                bis.close();
             }
 
             if (content != null){
@@ -58,7 +62,7 @@ public class ResponseHandler {
 
             os.flush();
             socket.close();
-        }
+       }
 
     }
 
