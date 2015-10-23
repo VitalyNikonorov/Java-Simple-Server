@@ -26,9 +26,9 @@ public class Main {
 
         CommandLine commandLine = parser.parse(options, args);
 
-        String directory = commandLine.getOptionValue("r", "www");
+        String directory = commandLine.getOptionValue("r", "/Users/vitaly/Documents/technopark/3/TP_Highload/www");
         String host = commandLine.getOptionValue("h", "0.0.0.0");
-        int port = Integer.parseInt(commandLine.getOptionValue("p", "8080"));
+        int port = Integer.parseInt(commandLine.getOptionValue("p", "80"));
 
         Settings.setDirectory(directory);
         System.out.print(Settings.getDirectory());
