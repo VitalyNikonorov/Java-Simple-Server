@@ -13,9 +13,7 @@ public class Main {
 
     static {
         options.addOption(new Option("r", true, "Root directory"));
-        options.addOption(new Option("c", true, "CPU number"));
         options.addOption(new Option("p", true, "Port"));
-        options.addOption(new Option("h", true, "Host"));
     }
 
     public static void main(String[] args) throws IOException, ParseException {
@@ -27,7 +25,6 @@ public class Main {
         CommandLine commandLine = parser.parse(options, args);
 
         String directory = commandLine.getOptionValue("r", "/Users/vitaly/Documents/technopark/3/TP_Highload/www");
-        String host = commandLine.getOptionValue("h", "0.0.0.0");
         int port = Integer.parseInt(commandLine.getOptionValue("p", "80"));
 
         Settings.setDirectory(directory);
