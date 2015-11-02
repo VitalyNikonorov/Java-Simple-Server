@@ -12,8 +12,8 @@ public class RequestHandler{
 
     private InputStream is;
 
-    public RequestHandler(Socket socket) throws IOException {
-        this.is = socket.getInputStream();
+    public RequestHandler(InputStream is) throws IOException {
+        this.is = is;
     }
 
     public String getRequest() throws IOException {

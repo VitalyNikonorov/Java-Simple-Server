@@ -21,9 +21,9 @@ public class ResponseHandler {
     private FileSystemHandler fileSystem;
     BufferedInputStream bis;
 
-    public ResponseHandler(Socket socket) throws IOException {
+    public ResponseHandler(OutputStream os, Socket socket) throws IOException {
         this.fileSystem = new FileSystemHandler();
-        this.os = socket.getOutputStream();
+        this.os = os;
         this.socket = socket;
     }
 
@@ -53,8 +53,12 @@ public class ResponseHandler {
                     int count;
                     byte[] buffer = new byte[8192];
                     while ((count = content.read(buffer)) > 0) {
-                        os.write(buffer, 0, count);
-                        os.flush();
+                        if (!socket.isClosed()) {
+                            os.write(buffer, 0, count);
+                            os.flush();
+                        }else{
+                            break;
+                        }
                     }
 
 
@@ -73,8 +77,6 @@ public class ResponseHandler {
             }
 
             os.flush();
-            socket.close();
-            os.close();
             System.out.println(Settings.threadCount.decrementAndGet());
        }
 

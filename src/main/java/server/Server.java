@@ -16,11 +16,17 @@ public class Server implements Runnable {
     private String requestMethod;
     private RequestHandler requestHandler;
     private ResponseHandler responseHandler;
+    private Socket socket;
+    private OutputStream os;
+    private InputStream is;
 
 
     public Server(Socket socket) throws IOException {
-        this.requestHandler = new RequestHandler(socket);
-        this.responseHandler = new ResponseHandler(socket);
+        this.socket = socket;
+        is = socket.getInputStream();
+        os = socket.getOutputStream();
+        this.requestHandler = new RequestHandler(is);
+        this.responseHandler = new ResponseHandler(os, socket);
         System.out.println(Settings.threadCount.incrementAndGet());
     }
 
@@ -45,6 +51,15 @@ public class Server implements Runnable {
 
         } catch (IOException e) {
             e.printStackTrace();
+        } finally {
+            try {
+                is.close();
+                os.close();
+                socket.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
         }
     }
 }

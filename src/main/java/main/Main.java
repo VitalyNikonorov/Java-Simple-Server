@@ -3,9 +3,7 @@ package main;
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.commons.cli.*;
@@ -20,10 +18,16 @@ public class Main {
         options.addOption(new Option("p", true, "Port"));
     }
 
-    public static void main(String[] args) throws IOException, ParseException {
+    public static void main(String[] args) throws ParseException, IOException {
 
         //ThreadPoolExecutor executor = (ThreadPoolExecutor) Executors.newCachedThreadPool();
-        ExecutorService executor = Executors.newFixedThreadPool(5);
+        //ExecutorService executor = Executors.newFixedThreadPool(5);
+
+        //BlockingQueue<Runnable> queue = new SynchronousQueue<>();
+        ExecutorService executorService = new ThreadPoolExecutor(5, 10,
+                0L, TimeUnit.MILLISECONDS,
+                new ArrayBlockingQueue<Runnable>(150));
+                //queue);
 
         CommandLineParser parser = new DefaultParser();
 
@@ -38,14 +42,13 @@ public class Main {
 
         ServerSocket ss = new ServerSocket(port);
 
-        while (Settings.isServerOnWork()) {
-            Socket s = ss.accept();
-            Server req = new Server(s);
-            executor.execute(req);
-            //new Thread(new Server(s)).start();
-        }
+            while (Settings.isServerOnWork()) {
+                Socket s = ss.accept();
+                Server req = new Server(s);
+                executorService.execute(req);
+                //new Thread(new Server(s)).start();
+            }
 
-        executor.shutdown();
-
+            executorService.shutdown();
     }
 }
