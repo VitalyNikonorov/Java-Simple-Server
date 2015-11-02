@@ -16,18 +16,13 @@ public class Main {
     static {
         options.addOption(new Option("r", true, "Root directory"));
         options.addOption(new Option("p", true, "Port"));
+        options.addOption(new Option("c", true, "CPU"));
     }
 
     public static void main(String[] args) throws ParseException, IOException {
 
         //ThreadPoolExecutor executor = (ThreadPoolExecutor) Executors.newCachedThreadPool();
-        //ExecutorService executor = Executors.newFixedThreadPool(5);
 
-        //BlockingQueue<Runnable> queue = new SynchronousQueue<>();
-        ExecutorService executorService = new ThreadPoolExecutor(5, 10,
-                0L, TimeUnit.MILLISECONDS,
-                new ArrayBlockingQueue<Runnable>(150));
-                //queue);
 
         CommandLineParser parser = new DefaultParser();
 
@@ -35,7 +30,9 @@ public class Main {
 
         String directory = commandLine.getOptionValue("r", "/Users/vitaly/Documents/technopark/3/TP_Highload/www");
         int port = Integer.parseInt(commandLine.getOptionValue("p", "8080"));
+        int poolSize = Integer.parseInt(commandLine.getOptionValue("c", "5"));
 
+        ExecutorService executor = Executors.newFixedThreadPool(poolSize);
         Settings.setDirectory(directory);
         System.out.print(Settings.getDirectory());
         Settings.threadCount = new AtomicInteger(0);
@@ -45,10 +42,10 @@ public class Main {
             while (Settings.isServerOnWork()) {
                 Socket s = ss.accept();
                 Server req = new Server(s);
-                executorService.execute(req);
+                executor.execute(req);
                 //new Thread(new Server(s)).start();
             }
 
-            executorService.shutdown();
+            executor.shutdown();
     }
 }
