@@ -2,6 +2,7 @@ package server;
 
 import handlers.RequestHandler;
 import handlers.ResponseHandler;
+import main.Settings;
 
 import java.io.*;
 import java.net.Socket;
@@ -20,6 +21,7 @@ public class Server implements Runnable {
     public Server(Socket socket) throws IOException {
         this.requestHandler = new RequestHandler(socket);
         this.responseHandler = new ResponseHandler(socket);
+        System.out.println(Settings.threadCount.incrementAndGet());
     }
 
     public void run() {

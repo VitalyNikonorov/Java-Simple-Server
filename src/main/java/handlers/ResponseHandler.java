@@ -1,5 +1,7 @@
 package handlers;
 
+import jdk.nashorn.internal.objects.annotations.Setter;
+import main.Settings;
 import org.apache.commons.io.IOUtils;
 import server.Generator;
 
@@ -45,8 +47,18 @@ public class ResponseHandler {
             if (requestMethod.equals("GET")) {
                 if (content400 == null) {
                     bis = new BufferedInputStream(content);
-                    IOUtils.copyLarge(bis, os);
-                }else{
+                    //IOUtils.copyLarge(bis, os);
+
+
+                    int count;
+                    byte[] buffer = new byte[8192];
+                    while ((count = content.read(buffer)) > 0) {
+                        os.write(buffer, 0, count);
+                        os.flush();
+                    }
+
+
+                } else {
                     os.write(content400);
                     os.flush();
                 }
@@ -62,6 +74,8 @@ public class ResponseHandler {
 
             os.flush();
             socket.close();
+            os.close();
+            System.out.println(Settings.threadCount.decrementAndGet());
        }
 
     }

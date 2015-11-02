@@ -1,5 +1,7 @@
 package main;
 
+import java.util.concurrent.atomic.AtomicInteger;
+
 /**
  * Created by vitaly on 17.10.15.
  */
@@ -18,6 +20,8 @@ public class Settings {
     public static String getDirectory() {
         return directory;
     }
+
+    public static AtomicInteger threadCount;
 
     public static void setDirectory(String directory) {
         Settings.directory = directory;

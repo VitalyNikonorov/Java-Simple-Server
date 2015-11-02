@@ -13,7 +13,7 @@ public class RequestHandler{
     private InputStream is;
 
     public RequestHandler(Socket socket) throws IOException {
-        this.is = socket.getInputStream();;
+        this.is = socket.getInputStream();
     }
 
     public String getRequest() throws IOException {
@@ -33,7 +33,11 @@ public class RequestHandler{
 
     public String findMethod(String request){
         int index = request.indexOf(' ');
-        return request.substring(0, index);
+        if (index != -1) {
+            return request.substring(0, index);
+        }else{
+            return "/";
+        }
     }
 
     public String getRoute(String request) throws UnsupportedEncodingException {
