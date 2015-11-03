@@ -30,12 +30,12 @@ public class Main {
 
         String directory = commandLine.getOptionValue("r", "/Users/vitaly/Documents/technopark/3/TP_Highload/www");
         int port = Integer.parseInt(commandLine.getOptionValue("p", "8080"));
-        int poolSize = Integer.parseInt(commandLine.getOptionValue("c", "5"));
+        int poolSize = 2 * (Integer.parseInt(commandLine.getOptionValue("c", "2"))) + 1;
 
         ExecutorService executor = Executors.newFixedThreadPool(poolSize);
         Settings.setDirectory(directory);
         System.out.print(Settings.getDirectory());
-        Settings.threadCount = new AtomicInteger(0);
+        //Settings.threadCount = new AtomicInteger(0);
 
         ServerSocket ss = new ServerSocket(port);
 

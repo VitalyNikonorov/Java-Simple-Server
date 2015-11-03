@@ -27,7 +27,7 @@ public class Server implements Runnable {
         os = socket.getOutputStream();
         this.requestHandler = new RequestHandler(is);
         this.responseHandler = new ResponseHandler(os, socket);
-        System.out.println(Settings.threadCount.incrementAndGet());
+        //System.out.println(Settings.threadCount.incrementAndGet());
     }
 
     public void run() {

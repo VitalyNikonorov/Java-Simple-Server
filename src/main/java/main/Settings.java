@@ -21,7 +21,7 @@ public class Settings {
         return directory;
     }
 
-    public static AtomicInteger threadCount;
+    //public static AtomicInteger threadCount;
 
     public static void setDirectory(String directory) {
         Settings.directory = directory;

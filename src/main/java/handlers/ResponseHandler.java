@@ -77,7 +77,7 @@ public class ResponseHandler {
             }
 
             os.flush();
-            System.out.println(Settings.threadCount.decrementAndGet());
+            //System.out.println(Settings.threadCount.decrementAndGet());
        }
 
     }
