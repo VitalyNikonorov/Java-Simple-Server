@@ -21,18 +21,20 @@ public class Main {
 
     public static void main(String[] args) throws ParseException, IOException {
 
-        //ThreadPoolExecutor executor = (ThreadPoolExecutor) Executors.newCachedThreadPool();
-
-
         CommandLineParser parser = new DefaultParser();
-
+        ThreadPoolExecutor executor = null;
         CommandLine commandLine = parser.parse(options, args);
 
         String directory = commandLine.getOptionValue("r", "/Users/vitaly/Documents/technopark/3/TP_Highload/www");
         int port = Integer.parseInt(commandLine.getOptionValue("p", "8080"));
-        int poolSize = 2 * (Integer.parseInt(commandLine.getOptionValue("c", "2"))) + 1;
+        int cpuNum = Integer.parseInt(commandLine.getOptionValue("c", "2"));
 
-        ExecutorService executor = Executors.newFixedThreadPool(poolSize);
+        if (cpuNum < 1) {
+            executor = (ThreadPoolExecutor) Executors.newCachedThreadPool();
+        }else{
+            executor = (ThreadPoolExecutor) Executors.newFixedThreadPool(2 * cpuNum + 1);
+        }
+
         Settings.setDirectory(directory);
         System.out.print(Settings.getDirectory());
         //Settings.threadCount = new AtomicInteger(0);
