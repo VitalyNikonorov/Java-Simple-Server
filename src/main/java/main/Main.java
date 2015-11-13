@@ -3,6 +3,7 @@ package main;
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.HashMap;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -39,7 +40,7 @@ public class Main {
         System.out.print(Settings.getDirectory());
         //Settings.threadCount = new AtomicInteger(0);
 
-        ServerSocket ss = new ServerSocket(port);
+        ServerSocket ss = new ServerSocket(port, 150);
 
             while (Settings.isServerOnWork()) {
                 Socket s = ss.accept();

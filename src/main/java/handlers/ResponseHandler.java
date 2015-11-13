@@ -7,6 +7,7 @@ import server.Generator;
 
 import java.io.*;
 import java.net.Socket;
+import java.net.SocketException;
 
 /**
  * Created by vitaly on 19.10.15.
@@ -53,14 +54,13 @@ public class ResponseHandler {
                     int count;
                     byte[] buffer = new byte[8192];
                     while ((count = content.read(buffer)) > 0) {
-                        if (!socket.isClosed()) {
-                            os.write(buffer, 0, count);
-                            os.flush();
+                        if (! socket.isClosed()) {
+                                os.write(buffer, 0, count);
+                                os.flush();
                         }else{
                             break;
                         }
                     }
-
 
                 } else {
                     os.write(content400);
