@@ -34,6 +34,8 @@ public class Server implements Runnable {
         try {
             String request = requestHandler.getRequest();
 
+            System.out.println("\n ------- \n" + request +"\n ------- \n" );
+
             requestMethod = requestHandler.findMethod(request);
 
             switch (requestMethod) {
